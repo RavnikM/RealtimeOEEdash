@@ -1,0 +1,515 @@
+[
+    {
+        "id": "4749887b86e58fe3",
+        "type": "tab",
+        "label": "OEE",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "81bd5f8a9c8be96d",
+        "type": "inject",
+        "z": "4749887b86e58fe3",
+        "name": "partStatus good",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "2.5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 310,
+        "y": 300,
+        "wires": [
+            [
+                "e5ea22a276ef61b0"
+            ]
+        ]
+    },
+    {
+        "id": "4fa91df0c78f0c7f",
+        "type": "comment",
+        "z": "4749887b86e58fe3",
+        "name": "Fake PLC (Step7 S300/S400/S1200/S1500)",
+        "info": "Fake PLC",
+        "x": 190,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "2e8b0bb23c081324",
+        "type": "comment",
+        "z": "4749887b86e58fe3",
+        "name": "OEE razlaga",
+        "info": "# Availability\nAvailability takes into account all events that stop planned production long enough where it makes sense to track a reason for being down (typically several minutes).\n\nAvailability is calculated as the ratio of Run Time to Planned Production Time:\n\n`Availability = Run Time / Planned Production Time`\n\nRun Time is simply Planned Production Time less Stop Time, where Stop Time is defined as all time where the manufacturing process was intended to be running but was not due to Unplanned Stops (e.g., Breakdowns) or Planned Stops (e.g., Changeovers).\n\n`Run Time = Planned Production Time − Stop Time`\n\n# Performance\nPerformance takes into account anything that causes the manufacturing process to run at less than the maximum possible speed when it is running (including both Slow Cycles and Small Stops).\n\nPerformance is the ratio of Net Run Time to Run Time. It is calculated as:\n\n`Performance = (Ideal Cycle Time × Total Count) / Run Time`\n\nIdeal Cycle Time is the fastest cycle time that your process can achieve in optimal circumstances. Therefore, when it is multiplied by Total Count the result is Net Run Time (the fastest possible time to manufacture the parts).\n\nSince rate is the reciprocal of time, Performance can also be calculated as:\n\n`Performance = (Total Count / Run Time) / Ideal Run Rate`\n\nPerformance should never be greater than 100%. If it is, that usually indicates that Ideal Cycle Time is set incorrectly (it is too high).\n\n# Quality\nQuality takes into account manufactured parts that do not meet quality standards, including parts that need rework. Remember, OEE Quality is similar to First Pass Yield, in that it defines Good Parts as parts that successfully pass through the manufacturing process the first time without needing any rework.\n\nQuality is calculated as:\n\n`Quality = Good Count / Total Count`\n\nThis is the same as taking the ratio of Fully Productive Time (only Good Parts manufactured as fast as possible with no Stop Time) to Net Run Time (all parts manufactured as fast as possible with no stop time).\n\n# OEE Formula\nOEE takes into account all losses, resulting in a measure of truly productive manufacturing time. It is calculated as:\n\n`OEE = Availability × Performance × Quality`\n\nIf the equations for Availability, Performance, and Quality are substituted in the above and reduced to their simplest terms, the result is:\n\n`OEE = (Good Count × Ideal Cycle Time) / Planned Production Time`\n\nThis is the “simplest” OEE calculation described earlier. And, as described earlier, multiplying Good Count by Ideal Cycle Time results in Fully Productive Time (manufacturing only Good Parts, as fast as possible, with no Stop Time).",
+        "x": 910,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "e5ea22a276ef61b0",
+        "type": "function",
+        "z": "4749887b86e58fe3",
+        "name": "partsCounter",
+        "func": "var ok = flow.get('ok')||0;\nvar bad = flow.get('bad')||0;\n\nif (msg.payload == 1)\n{\n    ok++;\n}\n    \nif (msg.payload == 0) \n{\n    bad++;\n}\n\nif (msg.topic == \"reset\") \n{\n    bad = 0;\n    ok = 0;\n}\n\nflow.set('ok', ok)\nflow.set('bad', bad)\n\nvar newMsg = { payload:\"count\" };\nnewMsg.ok = ok\nnewMsg.bad = bad\nnewMsg.topic = 'parts'\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 340,
+        "wires": [
+            [
+                "0dc319b0559b9557",
+                "ebead9d07e854c30",
+                "ae73feaa60e574d8"
+            ]
+        ]
+    },
+    {
+        "id": "e89b504f20fc253e",
+        "type": "inject",
+        "z": "4749887b86e58fe3",
+        "name": "schedule, article, cycle time and start",
+        "props": [
+            {
+                "p": "payload.start",
+                "v": "2022-02-11 22:55",
+                "vt": "str"
+            },
+            {
+                "p": "payload.stop",
+                "v": "2022-02-12 01:00",
+                "vt": "str"
+            },
+            {
+                "p": "payload.article",
+                "v": "bottle caps",
+                "vt": "str"
+            },
+            {
+                "p": "payload.cycleTime",
+                "v": "30",
+                "vt": "num"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "1",
+        "topic": "runTime",
+        "x": 210,
+        "y": 460,
+        "wires": [
+            [
+                "090f11af4c6860c5"
+            ]
+        ]
+    },
+    {
+        "id": "32c98842a35fcfdd",
+        "type": "inject",
+        "z": "4749887b86e58fe3",
+        "name": "partStatus bad",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "30",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 300,
+        "y": 380,
+        "wires": [
+            [
+                "e5ea22a276ef61b0"
+            ]
+        ]
+    },
+    {
+        "id": "0dc319b0559b9557",
+        "type": "debug",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 530,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "090f11af4c6860c5",
+        "type": "function",
+        "z": "4749887b86e58fe3",
+        "name": "scheduleCheck",
+        "func": "var runActive = flow.get('runActive')||true;\nvar alarmTime = flow.get('alarmTime')||0;\nvar runTime = flow.get('runTime')||0;\n\nstart = new Date(msg.payload.start);\nstop = new Date(msg.payload.stop);\nnow = new Date()\n\n//node.warn(now + ' ' + start + ' ' + stop)\n\nif ((now > start && now < stop) && msg.topic == \"runTime\")\n{\n  runActive = true;\n  runTime = Math.floor((stop - start) / 1000 / 60);\n  ActiveTime = ((now - start) / 1000 / 60) - alarmTime\n  flow.set('runTime', runTime);\n  flow.set('runActive', runActive);\n}\nelse if ((now < start || now > stop) && msg.topic == \"runTime\")\n{\n  runActive = false;\n  runTime = 0;\n  alarmTime = 0;\n  ActiveTime = 0;\n  flow.set('runTime', runTime);\n  flow.set('alarmTime', alarmTime);\n  flow.set('runActive', runActive);\n}\n\n\nif (msg.topic == \"alarmTime\")\n{\n    alarmTime = alarmTime + Math.floor(( (stop - start)) / 1000 / 60);\n    flow.set('alarmTime', alarmTime);\n    node.warn(\"Alarm time :\" + alarmTime + ', Run time : ' + runTime)\n}\n \nvar newMsg = { payload:\"schedule\" };\nnewMsg.cycleTime = msg.payload.cycleTime\nnewMsg.runActive = runActive;\nnewMsg.PlannedProductionTime = runTime;\nnewMsg.ActiveTime = ActiveTime\nnewMsg.AlarmTime = alarmTime;\nnewMsg.topic = 'time'\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 540,
+        "wires": [
+            [
+                "9b5381cd330510d6",
+                "27dbeab4e9fa5464",
+                "ae73feaa60e574d8",
+                "eefc5cba2b5e1b9a"
+            ]
+        ]
+    },
+    {
+        "id": "9b5381cd330510d6",
+        "type": "debug",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 490,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "42c79281ed2ac4c0",
+        "type": "inject",
+        "z": "4749887b86e58fe3",
+        "name": "reset",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "reset",
+        "x": 310,
+        "y": 240,
+        "wires": [
+            [
+                "e5ea22a276ef61b0"
+            ]
+        ]
+    },
+    {
+        "id": "ebead9d07e854c30",
+        "type": "function",
+        "z": "4749887b86e58fe3",
+        "name": "Quality",
+        "func": "/*\nQuality\nQuality takes into account manufactured parts that do not meet quality standards, \nincluding parts that need rework. Remember, OEE Quality is similar to First Pass Yield, \nin that it defines Good Parts as parts that successfully pass through the manufacturing process \nthe first time without needing any rework.\n\nQuality is calculated as:\n\nQuality = Good Count / Total Count\n\nThis is the same as taking the ratio of Fully Productive Time \n(only Good Parts manufactured as fast as possible with no Stop Time) to Net Run Time \n(all parts manufactured as fast as possible with no stop time).\n*/\nquality = 0\n\nquality = msg.ok / (msg.ok + msg.bad)\nvar newMsg = { payload:\"quality\" };\nnewMsg.quality = quality\nnewMsg.topic = \"quality\"\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 400,
+        "wires": [
+            [
+                "18d477796342ae74",
+                "59b67645c158defe"
+            ]
+        ]
+    },
+    {
+        "id": "27dbeab4e9fa5464",
+        "type": "function",
+        "z": "4749887b86e58fe3",
+        "name": "Availability",
+        "func": "/*\nAvailability\nAvailability takes into account all events that stop planned production long enough where it makes sense to track a reason for being down (typically several minutes).\n\nAvailability is calculated as the ratio of Run Time to Planned Production Time:\n\nAvailability = Run Time / Planned Production Time\n\nRun Time is simply Planned Production Time less Stop Time, where Stop Time is defined as all time where the manufacturing process was intended to be running but was not due to Unplanned Stops (e.g., Breakdowns) or Planned Stops (e.g., Changeovers).\n\nRun Time = Planned Production Time − Stop Time\n*/\n\n/*\n    msg.runActive = runActive;\n    msg.PlannedProductionTime = runTime;\n    msg.AlarmTime = alarmTime;\n    \n    node.warn(msg.runActive)\n    node.warn(msg.PlannedProductionTime)\n    node.warn(msg.AlarmTime)\n    node.warn(msg.runActive)\n*/\n\navailability = 0;\n    \nif (msg.runActive == true)\n{\n    /*\n    node.warn(msg.runActive)\n    node.warn(msg.PlannedProductionTime)\n    node.warn(msg.AlarmTime)\n    node.warn( (msg.PlannedProductionTime - msg.AlarmTime) / msg.PlannedProductionTime );\n    */\n    availability = ((msg.PlannedProductionTime - msg.AlarmTime) / msg.PlannedProductionTime)\n}\nvar newMsg = { payload:\"availability\" };\nnewMsg.availability = availability\nnewMsg.topic = \"availability\"\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 480,
+        "wires": [
+            [
+                "18d477796342ae74",
+                "ba79363a5a5ced4f"
+            ]
+        ]
+    },
+    {
+        "id": "34cdcd7b277798ca",
+        "type": "function",
+        "z": "4749887b86e58fe3",
+        "name": "Performance",
+        "func": "/*\nPerformance\nPerformance takes into account anything that causes the manufacturing process to \nrun at less than the maximum possible speed when it is running (including both Slow Cycles and Small Stops).\n\nPerformance is the ratio of Net Run Time to Run Time. It is calculated as:\n\nPerformance = (Ideal Cycle Time × Total Count) / Run Time\n\nIdeal Cycle Time is the fastest cycle time that your process can achieve in optimal\ncircumstances. Therefore, when it is multiplied by Total Count the result is Net Run Time (the fastest possible time to manufacture the parts).\n\nSince rate is the reciprocal of time, Performance can also be calculated as:\n\nPerformance = (Total Count / Run Time) / Ideal Run Rate\n\nPerformance should never be greater than 100%. If it is, that usually indicates that Ideal Cycle Time is set incorrectly (it is too high).\n*/\n\n/*\n\nmsg.ok = ok\nmsg.bad = bad\nmsg.topic = 'parts'\n\nmsg.cycleTime = msg.payload.cycleTime\nmsg.runActive = runActive;\nmsg.PlannedProductionTime = runTime;\nmsg.AlarmTime = alarmTime;\nmsg.ActiveTime\nmsg.topic = 'time'\n\n*/\nperformance = 0;\nif (msg.runActive == true)\n{\n   performance =   ((msg.ok + msg.bad) / msg.ActiveTime) / msg.cycleTime\n}\n\nvar newMsg = { payload:\"performance\" };\nnewMsg.performance = performance\nnewMsg.topic = \"performance\"\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 440,
+        "wires": [
+            [
+                "18d477796342ae74",
+                "fe6d71202528f03c"
+            ]
+        ]
+    },
+    {
+        "id": "fb051cb7d4c382aa",
+        "type": "inject",
+        "z": "4749887b86e58fe3",
+        "name": "Alarm (zastoj)",
+        "props": [
+            {
+                "p": "payload.start",
+                "v": "2022-02-11 05:00",
+                "vt": "str"
+            },
+            {
+                "p": "payload.stop",
+                "v": "2022-02-11 05:05",
+                "vt": "str"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "1",
+        "topic": "alarmTime",
+        "x": 290,
+        "y": 560,
+        "wires": [
+            [
+                "090f11af4c6860c5"
+            ]
+        ]
+    },
+    {
+        "id": "feca759e79bd3c64",
+        "type": "function",
+        "z": "4749887b86e58fe3",
+        "name": "OEE",
+        "func": "msg.oee = msg.performance * msg.availability * msg.quality\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1270,
+        "y": 360,
+        "wires": [
+            [
+                "3cb7e47a8e87900b"
+            ]
+        ]
+    },
+    {
+        "id": "18d477796342ae74",
+        "type": "join",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": true,
+        "timeout": "",
+        "count": "3",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1130,
+        "y": 440,
+        "wires": [
+            [
+                "feca759e79bd3c64",
+                "0d1297048edd308a"
+            ]
+        ]
+    },
+    {
+        "id": "3cb7e47a8e87900b",
+        "type": "debug",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1430,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "ae73feaa60e574d8",
+        "type": "join",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": true,
+        "timeout": "",
+        "count": "2",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 750,
+        "y": 440,
+        "wires": [
+            [
+                "34cdcd7b277798ca",
+                "3734cb7c773153f5"
+            ]
+        ]
+    },
+    {
+        "id": "eefc5cba2b5e1b9a",
+        "type": "debug",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 750,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "fe6d71202528f03c",
+        "type": "debug",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1070,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "59b67645c158defe",
+        "type": "debug",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1050,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "ba79363a5a5ced4f",
+        "type": "debug",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1090,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "0d1297048edd308a",
+        "type": "debug",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1310,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "3734cb7c773153f5",
+        "type": "debug",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 750,
+        "y": 180,
+        "wires": []
+    }
+]
