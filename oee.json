@@ -17,7 +17,7 @@
                 "p": "payload"
             }
         ],
-        "repeat": "2.2",
+        "repeat": "3",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -36,10 +36,10 @@
         "id": "4fa91df0c78f0c7f",
         "type": "comment",
         "z": "4749887b86e58fe3",
-        "name": "Fake PLC (Step7 S300/S400/S1200/S1500)",
+        "name": "Fake PLC/HMI npr. Step7 S300/S400/S1200/S1500",
         "info": "Fake PLC",
-        "x": 190,
-        "y": 120,
+        "x": 230,
+        "y": 160,
         "wires": []
     },
     {
@@ -49,7 +49,7 @@
         "name": "OEE razlaga",
         "info": "# Availability\nAvailability takes into account all events that stop planned production long enough where it makes sense to track a reason for being down (typically several minutes).\n\nAvailability is calculated as the ratio of Run Time to Planned Production Time:\n\n`Availability = Run Time / Planned Production Time`\n\nRun Time is simply Planned Production Time less Stop Time, where Stop Time is defined as all time where the manufacturing process was intended to be running but was not due to Unplanned Stops (e.g., Breakdowns) or Planned Stops (e.g., Changeovers).\n\n`Run Time = Planned Production Time − Stop Time`\n\n# Performance\nPerformance takes into account anything that causes the manufacturing process to run at less than the maximum possible speed when it is running (including both Slow Cycles and Small Stops).\n\nPerformance is the ratio of Net Run Time to Run Time. It is calculated as:\n\n`Performance = (Ideal Cycle Time × Total Count) / Run Time`\n\nIdeal Cycle Time is the fastest cycle time that your process can achieve in optimal circumstances. Therefore, when it is multiplied by Total Count the result is Net Run Time (the fastest possible time to manufacture the parts).\n\nSince rate is the reciprocal of time, Performance can also be calculated as:\n\n`Performance = (Total Count / Run Time) / Ideal Run Rate`\n\nPerformance should never be greater than 100%. If it is, that usually indicates that Ideal Cycle Time is set incorrectly (it is too high).\n\n# Quality\nQuality takes into account manufactured parts that do not meet quality standards, including parts that need rework. Remember, OEE Quality is similar to First Pass Yield, in that it defines Good Parts as parts that successfully pass through the manufacturing process the first time without needing any rework.\n\nQuality is calculated as:\n\n`Quality = Good Count / Total Count`\n\nThis is the same as taking the ratio of Fully Productive Time (only Good Parts manufactured as fast as possible with no Stop Time) to Net Run Time (all parts manufactured as fast as possible with no stop time).\n\n# OEE Formula\nOEE takes into account all losses, resulting in a measure of truly productive manufacturing time. It is calculated as:\n\n`OEE = Availability × Performance × Quality`\n\nIf the equations for Availability, Performance, and Quality are substituted in the above and reduced to their simplest terms, the result is:\n\n`OEE = (Good Count × Ideal Cycle Time) / Planned Production Time`\n\nThis is the “simplest” OEE calculation described earlier. And, as described earlier, multiplying Good Count by Ideal Cycle Time results in Fully Productive Time (manufacturing only Good Parts, as fast as possible, with no Stop Time).",
         "x": 910,
-        "y": 340,
+        "y": 280,
         "wires": []
     },
     {
@@ -69,7 +69,9 @@
             [
                 "0dc319b0559b9557",
                 "ebead9d07e854c30",
-                "ae73feaa60e574d8"
+                "ae73feaa60e574d8",
+                "3498a1d33e619bb7",
+                "a98f189613f9cc47"
             ]
         ]
     },
@@ -81,7 +83,7 @@
         "props": [
             {
                 "p": "payload.start",
-                "v": "2022-02-12 00:33",
+                "v": "2022-02-12 01:34",
                 "vt": "str"
             },
             {
@@ -156,8 +158,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 510,
-        "y": 260,
+        "x": 670,
+        "y": 300,
         "wires": []
     },
     {
@@ -171,7 +173,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 520,
+        "x": 500,
         "y": 540,
         "wires": [
             [
@@ -239,7 +241,8 @@
             [
                 "18d477796342ae74",
                 "59b67645c158defe",
-                "d88610e3fe641af0"
+                "d88610e3fe641af0",
+                "ff6d4515099d3101"
             ]
         ]
     },
@@ -260,7 +263,8 @@
             [
                 "18d477796342ae74",
                 "ba79363a5a5ced4f",
-                "d7f2de3a6fa33719"
+                "d7f2de3a6fa33719",
+                "ff6d4515099d3101"
             ]
         ]
     },
@@ -281,7 +285,8 @@
             [
                 "18d477796342ae74",
                 "fe6d71202528f03c",
-                "3ef6d2c7ef1c76e9"
+                "3ef6d2c7ef1c76e9",
+                "ff6d4515099d3101"
             ]
         ]
     },
@@ -311,8 +316,8 @@
         "once": false,
         "onceDelay": "1",
         "topic": "alarmTime",
-        "x": 310,
-        "y": 560,
+        "x": 290,
+        "y": 580,
         "wires": [
             [
                 "090f11af4c6860c5"
@@ -330,12 +335,14 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1270,
+        "x": 1290,
         "y": 360,
         "wires": [
             [
                 "3cb7e47a8e87900b",
-                "6acefe30c484529c"
+                "6acefe30c484529c",
+                "7004b88ba826c423",
+                "ff6d4515099d3101"
             ]
         ]
     },
@@ -381,7 +388,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1430,
+        "x": 1450,
         "y": 320,
         "wires": []
     },
@@ -405,7 +412,7 @@
         "reduceInit": "",
         "reduceInitType": "",
         "reduceFixup": "",
-        "x": 750,
+        "x": 710,
         "y": 440,
         "wires": [
             [
@@ -495,7 +502,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1310,
+        "x": 1290,
         "y": 480,
         "wires": []
     },
@@ -512,8 +519,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 770,
-        "y": 180,
+        "x": 890,
+        "y": 340,
         "wires": []
     },
     {
@@ -523,11 +530,11 @@
         "name": "",
         "group": "7c4bac9e6546739f",
         "order": 1,
-        "width": 0,
-        "height": 0,
+        "width": "0",
+        "height": "0",
         "gtype": "gage",
         "title": "Quality",
-        "label": "units",
+        "label": "",
         "format": "{{value}}",
         "min": 0,
         "max": "1",
@@ -539,8 +546,8 @@
         "seg1": "",
         "seg2": "",
         "className": "",
-        "x": 1160,
-        "y": 540,
+        "x": 1140,
+        "y": 660,
         "wires": []
     },
     {
@@ -554,7 +561,7 @@
         "height": 0,
         "gtype": "gage",
         "title": "Performance",
-        "label": "units",
+        "label": "",
         "format": "{{value}}",
         "min": 0,
         "max": "1",
@@ -566,8 +573,8 @@
         "seg1": "",
         "seg2": "",
         "className": "",
-        "x": 1170,
-        "y": 600,
+        "x": 1150,
+        "y": 720,
         "wires": []
     },
     {
@@ -581,7 +588,7 @@
         "height": 0,
         "gtype": "gage",
         "title": "Availability",
-        "label": "units",
+        "label": "",
         "format": "{{value}}",
         "min": 0,
         "max": "1",
@@ -593,8 +600,8 @@
         "seg1": "",
         "seg2": "",
         "className": "",
-        "x": 1170,
-        "y": 660,
+        "x": 1150,
+        "y": 780,
         "wires": []
     },
     {
@@ -602,13 +609,13 @@
         "type": "ui_gauge",
         "z": "4749887b86e58fe3",
         "name": "",
-        "group": "7c4bac9e6546739f",
+        "group": "0d9acf37926f502e",
         "order": 1,
         "width": 0,
         "height": 0,
-        "gtype": "gage",
-        "title": "foo",
-        "label": "units",
+        "gtype": "wave",
+        "title": "Overall Efficiency",
+        "label": "",
         "format": "{{value}}",
         "min": 0,
         "max": "1",
@@ -620,15 +627,128 @@
         "seg1": "",
         "seg2": "",
         "className": "",
-        "x": 1410,
+        "x": 1570,
         "y": 400,
+        "wires": []
+    },
+    {
+        "id": "7004b88ba826c423",
+        "type": "ui_chart",
+        "z": "4749887b86e58fe3",
+        "name": "",
+        "group": "0d9acf37926f502e",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "label": "OEE",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "1.2",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1530,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ff6d4515099d3101",
+        "type": "mysql",
+        "z": "4749887b86e58fe3",
+        "d": true,
+        "mydb": "",
+        "name": "",
+        "x": 1470,
+        "y": 660,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3498a1d33e619bb7",
+        "type": "ui_text",
+        "z": "4749887b86e58fe3",
+        "group": "eca91baf890b8a89",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "ok parts: ",
+        "format": "{{msg.ok}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 720,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "a98f189613f9cc47",
+        "type": "ui_text",
+        "z": "4749887b86e58fe3",
+        "group": "eca91baf890b8a89",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "bad parts :",
+        "format": "{{msg.bad}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 730,
+        "y": 160,
         "wires": []
     },
     {
         "id": "7c4bac9e6546739f",
         "type": "ui_group",
-        "name": "Default",
-        "tab": "7c993db261c6f7f8",
+        "name": "Q * P * A",
+        "tab": "b2ac192cb5e70c29",
+        "order": 1,
+        "disp": true,
+        "width": "7",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "0d9acf37926f502e",
+        "type": "ui_group",
+        "name": "OEE",
+        "tab": "b2ac192cb5e70c29",
+        "order": 1,
+        "disp": true,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "eca91baf890b8a89",
+        "type": "ui_group",
+        "name": "Produced goods",
+        "tab": "b2ac192cb5e70c29",
         "order": 1,
         "disp": true,
         "width": "6",
@@ -636,9 +756,9 @@
         "className": ""
     },
     {
-        "id": "7c993db261c6f7f8",
+        "id": "b2ac192cb5e70c29",
         "type": "ui_tab",
-        "name": "Home",
+        "name": "OEE",
         "icon": "dashboard",
         "disabled": false,
         "hidden": false
