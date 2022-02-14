@@ -93,7 +93,7 @@
             },
             {
                 "p": "payload.article",
-                "v": "bottle caps",
+                "v": "M8 Bolt",
                 "vt": "str"
             },
             {
@@ -167,7 +167,7 @@
         "type": "function",
         "z": "4749887b86e58fe3",
         "name": "scheduleCheck",
-        "func": "var runActive = flow.get('runActive')||false;\nvar alarmTime = flow.get('alarmTime')||0;\nvar PlannedProductionTime = flow.get('PlannedProductionTime')||0;\nvar ActiveTime = flow.get('ActiveTime')||0;\n\nstart = new Date(msg.payload.start);\nstop = new Date(msg.payload.stop);\nnow = new Date()\n\n//node.warn(now + ' ' + start + ' ' + stop)\n\nif ((now >= start && now <= stop) && msg.topic == \"PlannedProductionTime\")\n{\n  runActive = true;\n  //PlannedProductionTime = Math.floor((stop - start) / 1000 / 60);\n  PlannedProductionTime = ((stop - start) / 1000 / 60);\n  ActiveTime = (((now - start) / 1000 / 60) - alarmTime)\n  flow.set('PlannedProductionTime', PlannedProductionTime);\n  flow.set('runActive', runActive);\n}\nelse if ((now <= start || now >= stop) && msg.topic == \"PlannedProductionTime\")\n{\n  runActive = false;\n  PlannedProductionTime = 0;\n  alarmTime = 0;\n  ActiveTime = 0;\n  flow.set('PlannedProductionTime', PlannedProductionTime);\n  flow.set('alarmTime', alarmTime);\n  flow.set('runActive', runActive);\n}\n\n\nif (msg.topic == \"alarmTime\")\n{\n    alarmTime = alarmTime + Math.abs(( (stop - start)) / 1000 / 60);\n    flow.set('alarmTime', alarmTime);\n    node.warn(\"Alarm time :\" + alarmTime)\n    node.warn(\"Alarm\");\n}\n \nvar newMsg = { payload:\"schedule\" };\nnewMsg.cycleTime = msg.payload.cycleTime\nnewMsg.runActive = runActive;\nnewMsg.PlannedProductionTime = PlannedProductionTime.toFixed(3);\nnewMsg.ActiveTime = ActiveTime.toFixed(3)\nnewMsg.AlarmTime = alarmTime.toFixed(3);\nnewMsg.topic = 'time'\nreturn newMsg;",
+        "func": "var runActive = flow.get('runActive')||false;\nvar alarmTime = flow.get('alarmTime')||0;\nvar PlannedProductionTime = flow.get('PlannedProductionTime')||0;\nvar ActiveTime = flow.get('ActiveTime')||0;\n\nstart = new Date(msg.payload.start);\nstop = new Date(msg.payload.stop);\nnow = new Date()\n\n//node.warn(now + ' ' + start + ' ' + stop)\n\nif ((now >= start && now <= stop) && msg.topic == \"PlannedProductionTime\")\n{\n  runActive = true;\n  //PlannedProductionTime = Math.floor((stop - start) / 1000 / 60);\n  PlannedProductionTime = ((stop - start) / 1000 / 60);\n  ActiveTime = (((now - start) / 1000 / 60) - alarmTime)\n  flow.set('PlannedProductionTime', PlannedProductionTime);\n  flow.set('runActive', runActive);\n}\nelse if ((now <= start || now >= stop) && msg.topic == \"PlannedProductionTime\")\n{\n  runActive = false;\n  PlannedProductionTime = 0;\n  alarmTime = 0;\n  ActiveTime = 0;\n  flow.set('PlannedProductionTime', PlannedProductionTime);\n  flow.set('alarmTime', alarmTime);\n  flow.set('runActive', runActive);\n}\n\n\nif (msg.topic == \"alarmTime\")\n{\n    alarmTime = alarmTime + Math.abs(( (stop - start)) / 1000 / 60);\n    flow.set('alarmTime', alarmTime);\n    node.warn(\"Alarm time :\" + alarmTime)\n    node.warn(\"Alarm\");\n}\n \nvar newMsg = { payload:\"schedule\" };\nnewMsg.cycleTime = msg.payload.cycleTime\nnewMsg.runActive = runActive;\nnewMsg.PlannedProductionTime = PlannedProductionTime.toFixed(3);\nnewMsg.ActiveTime = ActiveTime.toFixed(3)\nnewMsg.AlarmTime = alarmTime.toFixed(3);\nnewMsg.Article = msg.payload.article\nnewMsg.topic = 'time'\nreturn newMsg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -183,7 +183,8 @@
                 "a994355fa8edd144",
                 "3271a891c5277be1",
                 "a108e5d38c8631cd",
-                "e05a7199320c4b41"
+                "e05a7199320c4b41",
+                "7d5af9ac93dea954"
             ]
         ]
     },
@@ -535,9 +536,9 @@
         "name": "",
         "group": "7c4bac9e6546739f",
         "order": 1,
-        "width": "0",
-        "height": "0",
-        "gtype": "gage",
+        "width": "2",
+        "height": "2",
+        "gtype": "donut",
         "title": "Quality",
         "label": "",
         "format": "{{msg.payload}}",
@@ -562,9 +563,9 @@
         "name": "",
         "group": "7c4bac9e6546739f",
         "order": 1,
-        "width": 0,
-        "height": 0,
-        "gtype": "gage",
+        "width": "3",
+        "height": "3",
+        "gtype": "donut",
         "title": "Performance",
         "label": "",
         "format": "{{value}}",
@@ -589,9 +590,9 @@
         "name": "",
         "group": "7c4bac9e6546739f",
         "order": 1,
-        "width": 0,
-        "height": 0,
-        "gtype": "gage",
+        "width": "2",
+        "height": "2",
+        "gtype": "donut",
         "title": "Availability",
         "label": "",
         "format": "{{value}}",
@@ -643,17 +644,17 @@
         "name": "",
         "group": "0d9acf37926f502e",
         "order": 4,
-        "width": 0,
-        "height": 0,
+        "width": "0",
+        "height": "0",
         "label": "OEE",
         "chartType": "line",
         "legend": "false",
         "xformat": "HH:mm:ss",
         "interpolate": "linear",
         "nodata": "",
-        "dot": false,
-        "ymin": "0",
-        "ymax": "1.2",
+        "dot": true,
+        "ymin": "",
+        "ymax": "",
         "removeOlder": 1,
         "removeOlderPoints": "",
         "removeOlderUnit": "60",
@@ -675,7 +676,7 @@
         "useDifferentColor": false,
         "className": "",
         "x": 1530,
-        "y": 440,
+        "y": 460,
         "wires": [
             []
         ]
@@ -796,6 +797,23 @@
         "wires": []
     },
     {
+        "id": "7d5af9ac93dea954",
+        "type": "ui_text",
+        "z": "4749887b86e58fe3",
+        "group": "da0ca3c11746999f",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Article",
+        "format": "{{msg.Article}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 730,
+        "y": 940,
+        "wires": []
+    },
+    {
         "id": "7c4bac9e6546739f",
         "type": "ui_group",
         "name": "Q * P * A",
@@ -842,7 +860,7 @@
     {
         "id": "b2ac192cb5e70c29",
         "type": "ui_tab",
-        "name": "OEE",
+        "name": "Copmany.Machine KPIs",
         "icon": "dashboard",
         "disabled": false,
         "hidden": false
