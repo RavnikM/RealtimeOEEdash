@@ -17,14 +17,14 @@
                 "p": "payload"
             }
         ],
-        "repeat": "4",
+        "repeat": "2",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "true",
         "payloadType": "bool",
-        "x": 620,
+        "x": 640,
         "y": 300,
         "wires": [
             [
@@ -57,14 +57,14 @@
         "type": "function",
         "z": "4749887b86e58fe3",
         "name": "PartsCounter",
-        "func": "var ok = flow.get('ok')||0;\nvar scrap = flow.get('scrap')||0;\n\nif (msg.payload == true)\n{\n    ok++;\n}\n    \nif (msg.payload == false) \n{\n    scrap++;\n}\n\nif (msg.topic == \"reset\") \n{\n    scrap = 0;\n    ok = 0;\n}\n\n// zavoljo simulacije da odšteje kose med tem ko naj bi bil alarm\nif (msg.topic == \"alarmTime\")\n{\n    ok = ok - 5\n}\n\nflow.set('ok', ok)\nflow.set('scrap', scrap)\n\nvar newMsg = { payload:\"count\" };\nnewMsg.ok = ok\nnewMsg.scrap = scrap\nnewMsg.topic = 'parts'\nreturn newMsg;",
+        "func": "var ok = flow.get('ok')||0;\nvar scrap = flow.get('scrap')||0;\n\nif (msg.payload == true)\n{\n    ok++;\n}\n    \nif (msg.payload == false) \n{\n    scrap++;\n    ok--;\n}\n\nif (msg.topic == \"reset\") \n{\n    scrap = 0;\n    ok = 0;\n}\n\n// zavoljo simulacije da odšteje kose med tem ko naj bi bil alarm\nif (msg.topic == \"alarmTime\")\n{\n    ok = ok - 5\n}\n\nflow.set('ok', ok)\nflow.set('scrap', scrap)\n\nvar newMsg = { payload:\"count\" };\nnewMsg.ok = ok\nnewMsg.scrap = scrap\nnewMsg.topic = 'parts'\nreturn newMsg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 850,
-        "y": 340,
+        "y": 320,
         "wires": [
             [
                 "ebead9d07e854c30",
@@ -81,18 +81,17 @@
         "name": "Production Schedule",
         "props": [
             {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
                 "p": "payload.start",
-                "v": "2022-02-25 22:42:40",
+                "v": "2022-03-08 20:34:50",
                 "vt": "str"
             },
             {
                 "p": "payload.stop",
-                "v": "2022-02-25 23:50",
-                "vt": "str"
-            },
-            {
-                "p": "payload.article",
-                "v": "M8 Bolt",
+                "v": "2022-03-08 23:50",
                 "vt": "str"
             },
             {
@@ -101,7 +100,8 @@
                 "vt": "num"
             },
             {
-                "p": "topic",
+                "p": "payload.article",
+                "v": "M8 Bolt",
                 "vt": "str"
             }
         ],
@@ -110,7 +110,7 @@
         "once": false,
         "onceDelay": "1",
         "topic": "PlannedProductionTime",
-        "x": 580,
+        "x": 600,
         "y": 460,
         "wires": [
             [
@@ -135,7 +135,7 @@
         "topic": "",
         "payload": "false",
         "payloadType": "bool",
-        "x": 640,
+        "x": 620,
         "y": 340,
         "wires": [
             [
@@ -148,7 +148,7 @@
         "type": "function",
         "z": "4749887b86e58fe3",
         "name": "ScheduleCheck",
-        "func": "var runActive = flow.get('runActive')||false;\nvar alarmTime = flow.get('alarmTime')||0;\nvar PlannedProductionTime = flow.get('PlannedProductionTime')||0;\nvar ActiveTime = flow.get('ActiveTime')||0;\n\nstart = new Date(msg.payload.start);\nstop = new Date(msg.payload.stop);\nnow = new Date()\n\n//node.warn(now + ' ' + start + ' ' + stop)\n\nif ((now >= start && now <= stop) && msg.topic == \"PlannedProductionTime\")\n{\n  runActive = true;\n  //PlannedProductionTime = Math.floor((stop - start) / 1000 / 60);\n  PlannedProductionTime = ((stop - start) / 1000 / 60);\n  ActiveTime = (((now - start) / 1000 / 60) - alarmTime)\n  flow.set('PlannedProductionTime', PlannedProductionTime);\n  flow.set('runActive', runActive);\n}\nelse if ((now <= start || now >= stop) && msg.topic == \"PlannedProductionTime\")\n{\n  runActive = false;\n  PlannedProductionTime = 0;\n  alarmTime = 0;\n  ActiveTime = 0;\n  flow.set('PlannedProductionTime', PlannedProductionTime);\n  flow.set('alarmTime', alarmTime);\n  flow.set('runActive', runActive);\n}\n\n\nif (msg.topic == \"alarmTime\")\n{\n    alarmTime = alarmTime + Math.abs(( (stop - start)) / 1000 / 60);\n    flow.set('alarmTime', alarmTime);\n    //node.warn(\"Alarm time :\" + alarmTime)\n    //node.warn(\"Alarm\");\n}\n \nvar newMsg = { payload:\"schedule\" };\nnewMsg.cycleTime = msg.payload.cycleTime\nnewMsg.runActive = runActive;\nnewMsg.PlannedProductionTime = PlannedProductionTime.toFixed(3);\nnewMsg.ActiveTime = ActiveTime.toFixed(3)\nnewMsg.AlarmTime = alarmTime.toFixed(3);\nnewMsg.Article = msg.payload.article\nnewMsg.topic = 'time'\nreturn newMsg;",
+        "func": "var RunActive = flow.get('RunActive')||false;\nvar AlarmTime = flow.get('AlarmTime')||0;\nvar PlannedProductionTime = flow.get('PlannedProductionTime')||0;\nvar ActiveTime = flow.get('ActiveTime')||0;\n\nstart = new Date(msg.payload.start);\nstop = new Date(msg.payload.stop);\nnow = new Date()\n\n//node.warn(now + ' ' + start + ' ' + stop)\n\nif ((now >= start && now <= stop) && msg.topic == \"PlannedProductionTime\")\n{\n  RunActive = true;\n  //PlannedProductionTime = Math.floor((stop - start) / 1000 / 60);\n  PlannedProductionTime = ((stop - start) / 1000 / 60);\n  ActiveTime = (((now - start) / 1000 / 60) - AlarmTime)\n  flow.set('PlannedProductionTime', PlannedProductionTime);\n  flow.set('RunActive', RunActive);\n}\nelse if ((now <= start || now >= stop) && msg.topic == \"PlannedProductionTime\")\n{\n  RunActive = false;\n  PlannedProductionTime = 0;\n  AlarmTime = 0;\n  ActiveTime = 0;\n  flow.set('PlannedProductionTime', PlannedProductionTime);\n  flow.set('AlarmTime', AlarmTime);\n  flow.set('RunActive', RunActive);\n}\n\n\nif (msg.topic == \"AlarmTime\")\n{\n    AlarmTime = AlarmTime + Math.abs(( (stop - start)) / 1000 / 60);\n    flow.set('AlarmTime', AlarmTime);\n    //node.warn(\"Alarm time :\" + AlarmTime)\n    //node.warn(\"Alarm\");\n}\n \nvar newMsg = { payload:\"schedule\" };\nnewMsg.cycleTime = msg.payload.cycleTime\nnewMsg.RunActive = RunActive;\nnewMsg.PlannedProductionTime = PlannedProductionTime.toFixed(3);\nnewMsg.ActiveTime = ActiveTime.toFixed(3)\nnewMsg.AlarmTime = AlarmTime.toFixed(3);\nnewMsg.Article = msg.payload.article\nnewMsg.topic = 'time'\nreturn newMsg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -185,7 +185,7 @@
         "once": false,
         "onceDelay": 0.1,
         "topic": "reset",
-        "x": 630,
+        "x": 650,
         "y": 380,
         "wires": [
             [
@@ -204,7 +204,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1270,
+        "x": 1240,
         "y": 400,
         "wires": [
             [
@@ -218,7 +218,7 @@
         "type": "function",
         "z": "4749887b86e58fe3",
         "name": "Availability",
-        "func": "/*\nAvailability\nAvailability takes into account all events that stop planned production long enough where it makes sense to track a reason for being down (typically several minutes).\n\nAvailability is calculated as the ratio of Run Time to Planned Production Time:\n\nAvailability = Run Time / Planned Production Time\n\nRun Time is simply Planned Production Time less Stop Time, where Stop Time is defined as all time where the manufacturing process was intended to be running but was not due to Unplanned Stops (e.g., Breakdowns) or Planned Stops (e.g., Changeovers).\n\nRun Time = Planned Production Time − Stop Time\n*/\n\n/*\n    msg.runActive = runActive;\n    msg.PlannedProductionTime = runTime;\n    msg.AlarmTime = alarmTime;\n    \n    node.warn(msg.runActive)\n    node.warn(msg.PlannedProductionTime)\n    node.warn(msg.AlarmTime)\n    node.warn(msg.runActive)\n*/\n\navailability = 0;\n    \nif (msg.runActive == true)\n{\n    /*\n    node.warn(msg.runActive)\n    node.warn(msg.PlannedProductionTime)\n    node.warn(msg.AlarmTime)\n    node.warn( (msg.PlannedProductionTime - msg.AlarmTime) / msg.PlannedProductionTime );\n    */\n    //availability = ((msg.PlannedProductionTime - msg.AlarmTime) / msg.PlannedProductionTime)\n    availability = ((msg.ActiveTime - msg.AlarmTime) / msg.ActiveTime).toFixed(3)\n\n}\nvar newMsg = { payload:availability };\nnewMsg.topic = \"availability\"\nreturn newMsg;",
+        "func": "/*\nAvailability\nAvailability takes into account all events that stop planned production long enough where it makes sense to track a reason for being down (typically several minutes).\n\nAvailability is calculated as the ratio of Run Time to Planned Production Time:\n\nAvailability = Run Time / Planned Production Time\n\nRun Time is simply Planned Production Time less Stop Time, where Stop Time is defined as all time where the manufacturing process was intended to be running but was not due to Unplanned Stops (e.g., Breakdowns) or Planned Stops (e.g., Changeovers).\n\nRun Time = Planned Production Time − Stop Time\n*/\n\n/*\n    msg.RunActive = RunActive;\n    msg.PlannedProductionTime = runTime;\n    msg.AlarmTime = alarmTime;\n    \n    node.warn(msg.RunActive)\n    node.warn(msg.PlannedProductionTime)\n    node.warn(msg.AlarmTime)\n    node.warn(msg.RunActive)\n*/\n\navailability = 0;\n    \nif (msg.RunActive == true)\n{\n    /*\n    node.warn(msg.RunActive)\n    node.warn(msg.PlannedProductionTime)\n    node.warn(msg.AlarmTime)\n    node.warn( (msg.PlannedProductionTime - msg.AlarmTime) / msg.PlannedProductionTime );\n    */\n    //availability = ((msg.PlannedProductionTime - msg.AlarmTime) / msg.PlannedProductionTime)\n    availability = ((msg.ActiveTime - msg.AlarmTime) / msg.ActiveTime).toFixed(3)\n\n}\nvar newMsg = { payload:availability };\nnewMsg.topic = \"availability\"\nreturn newMsg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -238,7 +238,7 @@
         "type": "function",
         "z": "4749887b86e58fe3",
         "name": "Performance",
-        "func": "/*\nPerformance\nPerformance takes into account anything that causes the manufacturing process to \nrun at less than the maximum possible speed when it is running (including both Slow Cycles and Small Stops).\n\nPerformance is the ratio of Net Run Time to Run Time. It is calculated as:\n\nPerformance = (Ideal Cycle Time × Total Count) / Run Time\n\nIdeal Cycle Time is the fastest cycle time that your process can achieve in optimal\ncircumstances. Therefore, when it is multiplied by Total Count the result is Net Run Time (the fastest possible time to manufacture the parts).\n\nSince rate is the reciprocal of time, Performance can also be calculated as:\n\nPerformance = (Total Count / Run Time) / Ideal Run Rate\n\nPerformance should never be greater than 100%. If it is, that usually indicates that Ideal Cycle Time is set incorrectly (it is too high).\n*/\n\n/*\n\nmsg.ok = ok\nmsg.bad = bad\nmsg.topic = 'parts'\n\nmsg.cycleTime = msg.payload.cycleTime\nmsg.runActive = runActive;\nmsg.PlannedProductionTime = runTime;\nmsg.AlarmTime = alarmTime;\nmsg.ActiveTime\nmsg.topic = 'time'\n\n*/\nperformance = 0;\nif (msg.runActive == true)\n{\n   performance =   (((msg.ok + msg.scrap) / msg.ActiveTime) / msg.cycleTime).toFixed(3)\n}\n\nvar newMsg = { payload:performance };\nnewMsg.topic = \"performance\"\nreturn newMsg;",
+        "func": "/*\nPerformance\nPerformance takes into account anything that causes the manufacturing process to \nrun at less than the maximum possible speed when it is running (including both Slow Cycles and Small Stops).\n\nPerformance is the ratio of Net Run Time to Run Time. It is calculated as:\n\nPerformance = (Ideal Cycle Time × Total Count) / Run Time\n\nIdeal Cycle Time is the fastest cycle time that your process can achieve in optimal\ncircumstances. Therefore, when it is multiplied by Total Count the result is Net Run Time (the fastest possible time to manufacture the parts).\n\nSince rate is the reciprocal of time, Performance can also be calculated as:\n\nPerformance = (Total Count / Run Time) / Ideal Run Rate\n\nPerformance should never be greater than 100%. If it is, that usually indicates that Ideal Cycle Time is set incorrectly (it is too high).\n*/\n\n/*\n\nmsg.ok = ok\nmsg.bad = bad\nmsg.topic = 'parts'\n\nmsg.cycleTime = msg.payload.cycleTime\nmsg.RunActive = RunActive;\nmsg.PlannedProductionTime = runTime;\nmsg.AlarmTime = alarmTime;\nmsg.ActiveTime\nmsg.topic = 'time'\n\n*/\nperformance = 0;\nif (msg.RunActive == true)\n{\n   performance =   (((msg.ok + msg.scrap) / msg.ActiveTime) / msg.cycleTime).toFixed(3)\n}\n\nvar newMsg = { payload:performance };\nnewMsg.topic = \"performance\"\nreturn newMsg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -260,6 +260,10 @@
         "name": "Brakedown",
         "props": [
             {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
                 "p": "payload.start",
                 "v": "2022-02-11 05:00:00",
                 "vt": "str"
@@ -268,18 +272,14 @@
                 "p": "payload.stop",
                 "v": "2022-02-11 05:00:10",
                 "vt": "str"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
             }
         ],
         "repeat": "",
         "crontab": "",
         "once": false,
         "onceDelay": "1",
-        "topic": "alarmTime",
-        "x": 620,
+        "topic": "AlarmTime",
+        "x": 640,
         "y": 420,
         "wires": [
             [
@@ -359,7 +359,7 @@
         "reduceInitType": "",
         "reduceFixup": "",
         "x": 1050,
-        "y": 440,
+        "y": 420,
         "wires": [
             [
                 "34cdcd7b277798ca",
@@ -544,7 +544,7 @@
         "mydb": "",
         "name": "",
         "x": 1850,
-        "y": 480,
+        "y": 460,
         "wires": [
             []
         ]
@@ -791,7 +791,7 @@
         "height": 0,
         "name": "",
         "label": "Run Active",
-        "format": "{{msg.runActive}}",
+        "format": "{{msg.RunActive}}",
         "layout": "row-spread",
         "className": "",
         "x": 1150,
